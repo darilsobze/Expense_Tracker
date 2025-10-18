@@ -1,12 +1,12 @@
 import sqlite3
 
-from flask import Flask
-import requests
-import jsonify
+from flask import Flask, request, jsonify
 
 import models
 
 app = Flask(__name__)
+
+models.creates_tables()
 
 
 @app.route('/')
@@ -14,16 +14,19 @@ def home():
     return "Hello Flask"
 
 
-@app.route('/add_expense', methods=["POST"])
+@app.route("/add_expense", methods=["POST"])
 def add_expense():
-    data = requests.get__json()
-    models.add_expense(
-        description=data["description"],
-        category=data["category"],
-        amount=data["amount"],
-        date=data["date"]
-    )
-    return jsonify({"message": "Expense added successfully!"})
+    try:
+        data = request.get_json()
+        description = data["description"]
+        category = data["category"]
+        amount = data["amount"]
+        date = data["date"]
+
+        models.add_expense(description, category, amount, date)
+        return jsonify({"message": "Expense added successfully!"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/get_expenses', methods=["GET"])
